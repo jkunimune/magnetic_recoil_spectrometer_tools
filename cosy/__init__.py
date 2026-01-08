@@ -2,12 +2,12 @@
 
 import typing
 import subprocess
-import fs
+import os
 import numpy as np
 import numpy.typing as npt
 
 __current_eval_ids = set()
-__cosy_cwd = fs.path.join(fs.path.dirname(fs.path.abspath(__file__)), "./eval/")
+__cosy_cwd = os.path.join(os.path.dirname(os.path.abspath(__file__)), "./eval/")
 
 
 def content_subs(content: str, subs: dict[str, typing.Any]) -> str:
@@ -46,7 +46,7 @@ def eval_fox(
         eval_id += 1
     __current_eval_ids.add(eval_id)
 
-    output_file = fs.path.join(__cosy_cwd, f"./{eval_id}.txt")
+    output_file = os.path.join(__cosy_cwd, f"./{eval_id}.txt")
 
     with open(output_file, "w", encoding="utf8") as f:
         pass
@@ -66,12 +66,12 @@ def eval_fox(
         + "\n"
     )
 
-    with open(fs.path.join(__cosy_cwd, f"./{eval_id}.fox"), "w", encoding="utf8") as f:
+    with open(os.path.join(__cosy_cwd, f"./{eval_id}.fox"), "w", encoding="utf8") as f:
         f.write(content)
     cosy_process = subprocess.Popen(
         (
             [
-                fs.path.join(__cosy_cwd, "./cosy"),
+                os.path.join(__cosy_cwd, "./cosy"),
                 f"{eval_id}.fox",
             ]
             if not use_gui
@@ -186,7 +186,7 @@ def parse_write_dict(
 
 
 with open(
-    fs.path.join(fs.path.dirname(fs.path.abspath(__file__)), "./utils.fox"),
+    os.path.join(os.path.dirname(os.path.abspath(__file__)), "./utils.fox"),
     "r",
     encoding="utf8",
 ) as f:
