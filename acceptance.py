@@ -7,6 +7,7 @@ import typing as ty
 
 import numpy as np
 import numpy.typing as npt
+from scipy import integrate
 
 from util import rng, random_partition
 
@@ -46,18 +47,16 @@ def srxm_attenuate(
     Calculate the slowing for charged particles with given `energy_in` and `depth_in`
     (depth until exiting material) using the slowing data table `srxm`.
     """
-    energy = np.array(energy_in)
-    depth = np.array(depth_in)
-    dx = depth / n_steps
-    for _ in range(n_steps):
-        stopping_power = np.interp(energy, srxm[0], srxm[1])
-        energy -= stopping_power * dx
-    energy[energy < srxm[0][0]] = 0
-    return energy
-
+    if n_steps == 0:
+        return energy_in
+    else:
+        range_curve = integrate.cumulative_trapezoid(x=srxm[0], y=1/srxm[1], initial=0)
+        initial_range = np.interp(energy_in, srxm[0], range_curve)
+        final_range = initial_range - depth_in
+        return np.interp(final_range, range_curve, srxm[0])
 
 def foil_trace(
-    n_rays_incident: int,
+    n_rays_incident: float,
     n_srxm_steps: int,
     phot_energy_in: float,
     foil_properties: Foil,
