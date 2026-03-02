@@ -98,28 +98,54 @@ N_PP = N_PP/np.sum(N_PP)
 N_compton = N_compton/np.sum(N_compton)
 E = (bins[0:-1] + bins[1:])/2
 
-ratios = np.linspace(0, 4)
-informations = np.empty_like(ratios)
+f_compton = N_compton/np.diff(bins)
+f_PP = N_PP/np.diff(bins)
+i_start = np.nonzero(f_compton >= np.max(f_compton)/10)[0][0]
+i_peak = np.argmax(f_compton)
+i_end = np.nonzero(f_compton >= np.max(f_compton)/10)[0][-1]
+start_half_max = np.interp(np.max(f_compton)/2, f_compton[i_start:i_peak + 1], E[i_start:i_peak + 1])
+end_half_max = np.interp(np.max(f_compton)/2, f_compton[i_end:i_peak - 1:-1], E[i_end:i_peak - 1:-1])
+
+print(f"Peak width = {(end_half_max - start_half_max)/MeV:.3f} MeV")
+print(f"Signal-to-background = ratio * {np.max(f_compton)/np.max(f_PP):.3g}")
+
+Z = np.linspace(1, 30)
+compton_to_PP = 1/(0.1102*Z)
+signal_to_background = np.max(f_compton)/np.max(f_PP)*compton_to_PP
+plt.figure(facecolor="none", figsize=(3.5, 3.0))
+plt.locator_params(steps=[1, 2, 5, 10])
+plt.plot(Z, signal_to_background)
+plt.grid()
+plt.xlim(0, 30)
+plt.ylim(0, 100)
+plt.xlabel("Atomic number")
+plt.ylabel("Peak height ratio")
+plt.tight_layout()
+
+ratios = np.linspace(0.1, 4, 51)
+information_per_electron = np.empty_like(ratios)
 for i, ratio in enumerate(ratios):
     N = 1/(1 + ratio)*N_PP + ratio/(1 + ratio)*N_compton
     p = N/np.diff(bins)
     dp_dE0 = -E/E0*np.gradient(p, E)
     dlogp_dE0 = dp_dE0/np.where(N > 0, p, np.nan)
-    informations[i] = np.sum(dlogp_dE0**2*N, where=N > 0)
+    information_per_electron[i] = np.sum(dlogp_dE0**2*N, where=N > 0)
+
+information_per_compton_electron = information_per_electron/(ratios/(1 + ratios))
 
 plt.figure(facecolor="none", figsize=(3.5, 3.0))
 plt.locator_params(steps=[1, 2, 5, 10])
-plt.plot(ratios, informations/(MeV**-2))
+plt.plot(ratios, information_per_compton_electron/(MeV**-2))
 plt.grid()
 plt.xlabel("Signal-to-PP ratio")
 plt.ylabel("Information (nat/MeV²/electron)")
 plt.xlim(0, 4)
-plt.ylim(0, 1.05*np.max(informations/(MeV**-2)))
+plt.ylim(0, 1.05*np.max(information_per_compton_electron/(MeV**-2)))
 plt.tight_layout()
 
 plt.figure(facecolor="none", figsize=(3.5, 3.0))
 plt.locator_params(steps=[1, 2, 5, 10])
-p = (N_PP + N_compton)/2/np.diff(bins)
+p = (f_PP + f_compton)/2
 plt.fill_between(E/MeV, p/(MeV**-1), 0)
 plt.ylabel("Energy distribution (MeV⁻¹)")
 plt.xlabel("Energy (MeV)")
