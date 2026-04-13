@@ -8,7 +8,7 @@ from cross_sections import (
     load_pairproduction_cross_section,
 )
 from acceptance import SRXMData, foil_trace, Foil, aperture
-from physical_constants import mol, MeV, millimeter, centimeter, gram, classical_electron_radius, barn, micrometer
+from physical_constants import dalton, MeV, millimeter, centimeter, gram, classical_electron_radius, barn, micrometer
 
 configurations = {
     "High-resolution": (15*MeV, 0.5*centimeter, 50*centimeter, 0.5*centimeter, 0.2*MeV, 0.015*MeV, 0.015*MeV),
@@ -17,11 +17,11 @@ configurations = {
 }
 
 materials = {
-    # "ideal Li": (3, 1.01, 0.5334*gram/centimeter**3, "lithium", False),
-    # "Li": (3, 6.94, 0.5334*gram/centimeter**3, "lithium", True),
-    "B": (5, 10.81, 2.35*gram/centimeter**3, "boron", True),
-    "Si": (14, 28.09, 2.329*gram/centimeter**3, "silicon", True),
-    "Fe": (26, 55.85, 7.874*gram/centimeter**3, "iron", True)
+    # "ideal Li": (3, 1.01*dalton, 0.5334*gram/centimeter**3, "lithium", False),
+    # "Li": (3, 6.94*dalton, 0.5334*gram/centimeter**3, "lithium", True),
+    "B": (5, 10.81*dalton, 2.35*gram/centimeter**3, "boron", True),
+    "Si": (14, 28.09*dalton, 2.329*gram/centimeter**3, "silicon", True),
+    "Fe": (26, 55.85*dalton, 7.874*gram/centimeter**3, "iron", True)
 }
 
 for configuration_name in configurations.keys():
@@ -31,7 +31,7 @@ for configuration_name in configurations.keys():
 
         print(material_name, configuration_name)
 
-        number_density = density / A * mol  # [/m^3]
+        number_density = density / A  # [/m^3]
 
         with open(f"./_data/estar_{material_name.split()[-1]}.txt", "r", encoding="utf8") as srem:
             x_srem = np.array(
